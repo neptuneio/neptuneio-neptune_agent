@@ -45,7 +45,7 @@ class neptune_agent (
     $require_sudo = '',
     $endpoint = '',
     $download_url = '',
-    $assigned_hostname = ' ',
+    $assigned_hostname = '',
     $neptune_api_key = '',
     $daemon = ''
   ) inherits neptune_agent::params {
@@ -64,30 +64,30 @@ class neptune_agent (
     user => "${neptune_agent::params::agent_user}"
   }
 
-  if (${neptune_agent::agent_user}) {
+  if ("${neptune_agent::agent_user}" != "") {
     $user = "AGENT_USER=${neptune_agent::agent_user}"
   } 
-  elsif (${neptune_agent::params::agent_user}) {
+  elsif ("${neptune_agent::params::agent_user}" != "") {
     $user = "AGENT_USER=${neptune_agent::params::agent_user}"
   }
   else {
     $user = ''
   }
   
-  if (${neptune_agent::require_sudo}) {
+  if ("${neptune_agent::require_sudo}" != "") {
     $sudo = "REQUIRE_SUDO=${neptune_agent::require_sudo}"
   }
-  elsif (${neptune_agent::params::require_sudo}) {
+  elsif ("${neptune_agent::params::require_sudo}" != "") {
     $sudo = "REQUIRE_SUDO=${neptune_agent::params::require_sudo}"
   }
   else {
     $sudo = ''
   }
 
-  if (${neptune_agent::assigned_hostname}) {
+  if ("${neptune_agent::assigned_hostname}" != "") {
     $assigned_host = "ASSIGNED_HOST_NAME=${neptune_agent::assigned_hostname}"
   }
-  elsif (${neptune_agent::params::assigned_hostname}) {
+  elsif ("${neptune_agent::params::assigned_hostname}" != "") {
     $assigned_host = "ASSIGNED_HOST_NAME=${neptune_agent::params::assigned_hostname}"
   }
   else {
