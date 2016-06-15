@@ -1,0 +1,15 @@
+{
+  "name": "neptune-neptune_agent",
+  "version": "0.1.0",
+  "author": "neptune",
+  "summary": "Installs Neptune agent on a server.",
+  "license": "Pricate",
+  "source": "https://github.com/neptuneio/puppet-nagent",
+  "project_page": "https://github.com/neptuneio/puppet-nagent",
+  "issues_url": "https://github.com/neptuneio/puppet-nagent/issues",
+  "dependencies": [
+    {"name":"puppetlabs-stdlib","version_requirement":">= 1.0.0"}
+  ],
+  "data_provider": null
+}
+
