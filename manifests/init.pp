@@ -1,46 +1,44 @@
 # Class: neptune_agent
 # ===========================
 #
-# Full description of class neptune_agent here.
+# This class contains mechanism to install Neptune agent on a linux server
 #
 # Parameters
 # ----------
 #
-# Document parameters here.
+# * `agent_user`
+# The user as which the Neptune.io agent should run on your server.
+# You can either choose one of the existing users or give a new user name.
 #
-# * `sample parameter`
-# Explanation of what this parameter affects and what it defaults to.
-# e.g. "Specify one or more upstream ntp servers as an array."
+# * `require_sudo`
+# Flag indicating if the Neptune.io should have sudo previleges or not.
+# Set to false by default, means Neptune.io cannot run sudo command.
 #
-# Variables
-# ----------
+# * `neptune_api_key`
+# Your Neptune.io API key. Get this from Neptune.io web app.
 #
-# Here you should define a list of variables that this module would require.
-#
-# * `sample variable`
-#  Explanation of how this variable affects the function of this class and if
-#  it has a default. e.g. "The parameter enc_ntp_servers must be set by the
-#  External Node Classifier as a comma separated list of hostnames." (Note,
-#  global variables should be avoided in favor of class parameters as
-#  of Puppet 2.6.)
+# * `assigned_hostname`
+# If you want to override any of the host names, set this parameter so that
+# Neptune.io uses this name instead of `hostname` value from that host.
 #
 # Examples
 # --------
 #
 # @example
 #    class { 'neptune_agent':
-#      servers => [ 'pool.ntp.org', 'ntp.local.company.com' ],
+#      neptune_api_key => "dummy_api_key",
+#      require_sudo => "true"
 #    }
 #
 # Authors
 # -------
 #
-# Author Name <author@domain.com>
+# Neptune Inc <team@neptune.io>
 #
 # Copyright
 # ---------
 #
-# Copyright 2016 Your name here, unless otherwise noted.
+# Copyright 2016 Neptune.io Inc
 #
 class neptune_agent (
     $agent_user = '',
@@ -66,13 +64,38 @@ class neptune_agent (
     user => "${neptune_agent::params::agent_user}"
   }
 
-  $envs = [ 
-    "API_KEY=${neptune_agent::neptune_api_key}", 
-    "AGENT_USER=${neptune_agent::params::agent_user}",
-    "END_POINT=${neptune_agent::params::endpoint}",
-    "REQUIRE_SUDO=${neptune_agent::params::require_sudo}",
-    "ASSIGNED_HOST_NAME=${neptune_agent::assigned_hostname}"
-  ]
+  if (${neptune_agent::agent_user}) {
+    $user = "AGENT_USER=${neptune_agent::agent_user}"
+  } 
+  elsif (${neptune_agent::params::agent_user}) {
+    $user = "AGENT_USER=${neptune_agent::params::agent_user}"
+  }
+  else {
+    $user = ''
+  }
+  
+  if (${neptune_agent::require_sudo}) {
+    $sudo = "REQUIRE_SUDO=${neptune_agent::require_sudo}"
+  }
+  elsif (${neptune_agent::params::require_sudo}) {
+    $sudo = "REQUIRE_SUDO=${neptune_agent::params::require_sudo}"
+  }
+  else {
+    $sudo = ''
+  }
+
+  if (${neptune_agent::assigned_hostname}) {
+    $assigned_host = "ASSIGNED_HOST_NAME=${neptune_agent::assigned_hostname}"
+  }
+  elsif (${neptune_agent::params::assigned_hostname}) {
+    $assigned_host = "ASSIGNED_HOST_NAME=${neptune_agent::params::assigned_hostname}"
+  }
+  else {
+    $assigned_host = ''
+  }
+
+  # split into array based on whitespace
+  $envs = split("END_POINT=${neptune_agent::params::endpoint} API_KEY=${neptune_agent::neptune_api_key} $sudo $user $assigned_host", '\s+')
 
   # Install agent to init.d
   exec {'install_neptune_agent':
@@ -82,7 +105,8 @@ class neptune_agent (
     user => "root",
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
     unless => 'ls /etc/init.d/${neptune_agent::params::daemon}',
-    require => Exec['download_installer']
+    require => Exec['download_installer'],
+    logoutput => 'true'
   }
 
   # Start the service if not running

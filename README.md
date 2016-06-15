@@ -61,7 +61,6 @@ Please clone, make changes and send in a pull request.
 
 ## Release Notes/Contributors/Etc. **Optional**
 
-## Release Notes
 v 0.1.0
 
 # Author
